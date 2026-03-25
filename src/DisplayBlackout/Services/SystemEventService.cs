@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+
 using static DisplayBlackout.NativeMethods;
 
 namespace DisplayBlackout.Services;
@@ -13,8 +14,8 @@ internal sealed partial class SystemEventService : IDisposable
     private const string WindowClassName = "DisplayBlackoutSystemEvents";
     private const int HotkeyId = 1;
 
-    private static readonly WndProcDelegate s_wndProc = WndProc;
-    private static readonly WinEventDelegate s_winEventProc = WinEventProc;
+    private static readonly WndProcDelegate _wndProc = WndProc;
+    private static readonly WinEventDelegate _winEventProc = WinEventProc;
 
     public static SystemEventService Instance { get; } = new();
 
@@ -24,10 +25,13 @@ internal sealed partial class SystemEventService : IDisposable
     private bool _initialized;
 
     public event EventHandler? HotkeyPressed;
+
     public event EventHandler? DisplayChanged;
+
     public event EventHandler? FocusChanged;
 
-    private SystemEventService() { }
+    private SystemEventService()
+    { }
 
     /// <summary>
     /// Registers the hidden window, hotkey, and WinEvent hooks.
@@ -44,7 +48,7 @@ internal sealed partial class SystemEventService : IDisposable
         var wc = new WNDCLASSEXW
         {
             cbSize = (uint)Marshal.SizeOf<WNDCLASSEXW>(),
-            lpfnWndProc = Marshal.GetFunctionPointerForDelegate(s_wndProc),
+            lpfnWndProc = Marshal.GetFunctionPointerForDelegate(_wndProc),
             hInstance = GetModuleHandleW(null),
             lpszClassName = WindowClassName
         };
@@ -84,7 +88,7 @@ internal sealed partial class SystemEventService : IDisposable
             EVENT_SYSTEM_FOREGROUND,
             EVENT_SYSTEM_FOREGROUND,
             0,
-            s_winEventProc,
+            _winEventProc,
             0,
             0,
             WINEVENT_OUTOFCONTEXT);
@@ -93,7 +97,7 @@ internal sealed partial class SystemEventService : IDisposable
             EVENT_OBJECT_FOCUS,
             EVENT_OBJECT_FOCUS,
             0,
-            s_winEventProc,
+            _winEventProc,
             0,
             0,
             WINEVENT_OUTOFCONTEXT);

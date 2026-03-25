@@ -18,8 +18,12 @@ internal sealed class MonitorPickerView : UserControl
     public MonitorPickerView(BlackoutService blackoutService)
     {
         _blackoutService = blackoutService;
-        _container = new StackPanel().Horizontal().Spacing(4).Center();
-        Content = _container;
+
+        Content = new StackPanel()
+            .Ref(out _container)
+            .Horizontal()
+            .Spacing(4)
+            .Center();
 
         BuildMonitors();
     }
@@ -34,6 +38,7 @@ internal sealed class MonitorPickerView : UserControl
     private void BuildMonitors()
     {
         var monitors = MonitorHelper.GetAllMonitors();
+
         if (monitors.Count == 0)
         {
             return;
@@ -105,7 +110,9 @@ internal sealed class MonitorPickerView : UserControl
 internal sealed class MonitorToggle
 {
     public string BoundsKey { get; }
+
     public bool IsPrimary { get; }
+
     public ToggleButton Button { get; }
 
     public MonitorToggle(int displayNumber, string boundsKey, bool isPrimary, bool isSelected)

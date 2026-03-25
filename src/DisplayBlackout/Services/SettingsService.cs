@@ -5,11 +5,11 @@ namespace DisplayBlackout.Services;
 
 internal sealed class SettingsService
 {
-    private static readonly string s_settingsDir = Path.Combine(
+    private static readonly string _settingsDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "DisplayBlackout");
+        "DisplayBlackout.MewUI");
 
-    private static readonly string s_settingsPath = Path.Combine(s_settingsDir, "settings.json");
+    private static readonly string _settingsPath = Path.Combine(_settingsDir, "settings.json");
 
     private AppSettings _settings;
 
@@ -90,9 +90,9 @@ internal sealed class SettingsService
     {
         try
         {
-            if (File.Exists(s_settingsPath))
+            if (File.Exists(_settingsPath))
             {
-                var json = File.ReadAllText(s_settingsPath);
+                var json = File.ReadAllText(_settingsPath);
                 return JsonSerializer.Deserialize(json, AppSettingsJsonContext.Default.AppSettings) ?? new AppSettings();
             }
         }
@@ -107,9 +107,9 @@ internal sealed class SettingsService
     {
         try
         {
-            Directory.CreateDirectory(s_settingsDir);
+            Directory.CreateDirectory(_settingsDir);
             var json = JsonSerializer.Serialize(_settings, AppSettingsJsonContext.Default.AppSettings);
-            File.WriteAllText(s_settingsPath, json);
+            File.WriteAllText(_settingsPath, json);
         }
         catch
         {
@@ -121,9 +121,13 @@ internal sealed class SettingsService
 internal sealed class AppSettings
 {
     public string? SelectedMonitorBounds { get; set; }
+
     public int Opacity { get; set; } = 100;
+
     public bool ClickThrough { get; set; }
+
     public string? Theme { get; set; }
+
     public string? Accent { get; set; }
 }
 

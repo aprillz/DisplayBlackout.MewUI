@@ -31,7 +31,7 @@ bool hotkeyAvailable = SystemEventService.Instance.Initialize();
 SystemEventService.Instance.HotkeyPressed += (_, _) => blackoutService.Toggle();
 SystemEventService.Instance.DisplayChanged += (_, _) =>
 {
-    if (blackoutService.IsBlackedOut)
+    if (blackoutService.IsBlackedOut.Value)
     {
         blackoutService.Restore();
     }
@@ -45,9 +45,7 @@ var trayIcon = TrayIconService.FromResources(asm, "icon.ico", "icon-inactive.ico
 trayIcon.Clicked += () => blackoutService.Toggle();
 trayIcon.Show();
 
-blackoutService.BlackoutStateChanged += (_, e) => trayIcon.SetActive(e.IsBlackedOut);
-
-var appIcon = IconSource.FromResource(asm, "icon.ico");
+blackoutService.IsBlackedOut.Subscribe(() => trayIcon.SetActive(blackoutService.IsBlackedOut.Value));
 
 // Restore saved theme/accent
 var savedAccent = settingsService.LoadAccent();
@@ -62,32 +60,12 @@ var savedTheme = settingsService.LoadTheme() switch
 Application.Create()
     .UseTheme(savedTheme)
     .UseAccent(accent)
-    .BuildMainWindow(() => new Window()
-        .FitContentHeight(700)
-        .Padding(0)
-        .StartCenterScreen()
-        .OnBuild(w =>
-        {
-            w.Title("Display Blackout");
-            w.Icon(appIcon);
-            w.Content(new SettingsView(blackoutService, settingsService));
-
-            trayIcon.DoubleClicked += () =>
-            {
-                w.Show();
-            };
-
-            if (!hotkeyAvailable)
-            {
-                w.OnLoaded(() =>
-                {
-                    _ = MessageBox.NotifyAsync(
-                        "Failed to register hotkey Win+Shift+B.\nIt may be in use by another application.\n\nYou can still toggle blackout from the tray icon.",
-                        PromptIconKind.Warning,
-                        owner: w);
-                });
-            }
-        }))
+    .BuildMainWindow(() =>
+    {
+        var window = new MainWindow(blackoutService, settingsService, hotkeyAvailable);
+        trayIcon.DoubleClicked += () => window.Show();
+        return window;
+    })
     .Run();
 
 // Cleanup

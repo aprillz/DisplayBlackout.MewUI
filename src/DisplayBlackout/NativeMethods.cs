@@ -35,6 +35,7 @@ internal static partial class NativeMethods
         public int Bottom;
 
         public readonly int Width => Right - Left;
+
         public readonly int Height => Bottom - Top;
     }
 
@@ -56,6 +57,7 @@ internal static partial class NativeMethods
         public RECT rcMonitor;
         public RECT rcWork;
         public uint dwFlags;
+
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
         public string szDevice;
 
@@ -78,15 +80,21 @@ internal static partial class NativeMethods
         public uint uFlags;
         public uint uCallbackMessage;
         public nint hIcon;
+
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public string szTip;
+
         public uint dwState;
         public uint dwStateMask;
+
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
         public string szInfo;
+
         public uint uVersion;
+
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
         public string szInfoTitle;
+
         public uint dwInfoFlags;
         public Guid guidItem;
         public nint hBalloonIcon;
@@ -108,11 +116,11 @@ internal static partial class NativeMethods
     [Flags]
     public enum WINDOW_EX_STYLE : uint
     {
-        WS_EX_TOPMOST     = 0x00000008,
+        WS_EX_TOPMOST = 0x00000008,
         WS_EX_TRANSPARENT = 0x00000020,
-        WS_EX_TOOLWINDOW  = 0x00000080,
-        WS_EX_LAYERED     = 0x00080000,
-        WS_EX_NOACTIVATE  = 0x08000000,
+        WS_EX_TOOLWINDOW = 0x00000080,
+        WS_EX_LAYERED = 0x00080000,
+        WS_EX_NOACTIVATE = 0x08000000,
     }
 
     [Flags]
@@ -140,8 +148,8 @@ internal static partial class NativeMethods
     [Flags]
     public enum SET_WINDOW_POS_FLAGS : uint
     {
-        SWP_NOSIZE     = 0x0001,
-        SWP_NOMOVE     = 0x0002,
+        SWP_NOSIZE = 0x0001,
+        SWP_NOMOVE = 0x0002,
         SWP_NOACTIVATE = 0x0010,
     }
 
@@ -154,7 +162,7 @@ internal static partial class NativeMethods
     public enum HOT_KEY_MODIFIERS : uint
     {
         MOD_SHIFT = 0x0004,
-        MOD_WIN   = 0x0008,
+        MOD_WIN = 0x0008,
     }
 
     public enum VIRTUAL_KEY : uint
@@ -180,16 +188,18 @@ internal static partial class NativeMethods
 
     // Notify icon flags
     public const uint NIF_MESSAGE = 0x00000001;
-    public const uint NIF_ICON    = 0x00000002;
-    public const uint NIF_TIP     = 0x00000004;
-    public const uint NIM_ADD     = 0x00000000;
-    public const uint NIM_MODIFY  = 0x00000001;
-    public const uint NIM_DELETE  = 0x00000002;
+
+    public const uint NIF_ICON = 0x00000002;
+    public const uint NIF_TIP = 0x00000004;
+    public const uint NIM_ADD = 0x00000000;
+    public const uint NIM_MODIFY = 0x00000001;
+    public const uint NIM_DELETE = 0x00000002;
     public const uint NIM_SETVERSION = 0x00000004;
     public const uint NOTIFYICON_VERSION_4 = 4;
 
     // Menu flags
-    public const uint MF_STRING    = 0x00000000;
+    public const uint MF_STRING = 0x00000000;
+
     public const uint MF_SEPARATOR = 0x00000800;
     public const uint TPM_RIGHTBUTTON = 0x0002;
     public const uint TPM_BOTTOMALIGN = 0x0020;
@@ -343,6 +353,7 @@ internal static partial class NativeMethods
 
     // Image loading constants
     public const uint IMAGE_ICON = 1;
+
     public const uint LR_LOADFROMFILE = 0x00000010;
     public const uint LR_DEFAULTSIZE = 0x00000040;
 

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+
 using static DisplayBlackout.NativeMethods;
 
 namespace DisplayBlackout;
@@ -17,9 +18,9 @@ internal sealed partial class BlackoutOverlay : IDisposable
 {
     private const string WindowClassName = "DisplayBlackoutOverlay";
 
-    private static readonly object s_classLock = new();
-    private static bool s_classRegistered;
-    private static WndProcDelegate? s_wndProc;
+    private static readonly object _classLock = new();
+    private static bool _classRegistered;
+    private static WndProcDelegate? _wndProc;
 
     private WINDOW_EX_STYLE _exStyle;
     private nint _hwnd1;
@@ -163,19 +164,19 @@ internal sealed partial class BlackoutOverlay : IDisposable
 
     private static void EnsureWindowClassRegistered()
     {
-        lock (s_classLock)
+        lock (_classLock)
         {
-            if (s_classRegistered)
+            if (_classRegistered)
             {
                 return;
             }
 
-            s_wndProc = WndProc;
+            _wndProc = WndProc;
 
             var wc = new WNDCLASSEXW
             {
                 cbSize = (uint)Marshal.SizeOf<WNDCLASSEXW>(),
-                lpfnWndProc = Marshal.GetFunctionPointerForDelegate(s_wndProc),
+                lpfnWndProc = Marshal.GetFunctionPointerForDelegate(_wndProc),
                 hInstance = GetModuleHandleW(null),
                 hCursor = LoadCursorW(0, IDC_ARROW),
                 hbrBackground = GetStockObject(GET_STOCK_OBJECT_FLAGS.BLACK_BRUSH),
@@ -187,7 +188,7 @@ internal sealed partial class BlackoutOverlay : IDisposable
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
             }
 
-            s_classRegistered = true;
+            _classRegistered = true;
         }
     }
 

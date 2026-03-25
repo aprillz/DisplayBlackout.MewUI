@@ -1,3 +1,5 @@
+using Aprillz.MewUI;
+
 namespace DisplayBlackout.Services;
 
 internal sealed partial class BlackoutService : IDisposable
@@ -5,22 +7,46 @@ internal sealed partial class BlackoutService : IDisposable
     private readonly SettingsService _settingsService;
     private readonly Dictionary<nint, BlackoutOverlay> _blackoutOverlays = [];
     private HashSet<string>? _selectedMonitorBounds;
-    private int _opacity;
-    private bool _clickThrough;
-    private bool _isBlackedOut;
     private bool _disposed;
+
+    public ObservableValue<bool> IsBlackedOut { get; }
+
+    public ObservableValue<int> Opacity { get; }
+
+    public ObservableValue<bool> ClickThrough { get; }
 
     public BlackoutService(SettingsService settingsService)
     {
         _settingsService = settingsService;
         _selectedMonitorBounds = _settingsService.LoadSelectedMonitorBounds();
-        _opacity = _settingsService.LoadOpacity();
-        _clickThrough = _settingsService.LoadClickThrough();
+
+        IsBlackedOut = new(false);
+        Opacity = new(settingsService.LoadOpacity());
+        ClickThrough = new(settingsService.LoadClickThrough());
+
+        IsBlackedOut.Subscribe(() =>
+        {
+            if (IsBlackedOut.Value)
+                BlackOutInternal();
+            else
+                RestoreInternal();
+        });
+
+        Opacity.Subscribe(() =>
+        {
+            int value = Opacity.Value;
+            _settingsService.SaveOpacity(value);
+            foreach (var overlay in _blackoutOverlays.Values)
+                overlay.SetOpacity(value);
+        });
+
+        ClickThrough.Subscribe(() =>
+        {
+            _settingsService.SaveClickThrough(ClickThrough.Value);
+            foreach (var overlay in _blackoutOverlays.Values)
+                overlay.SetClickThrough(ClickThrough.Value);
+        });
     }
-
-    public bool IsBlackedOut => _isBlackedOut;
-
-    public event EventHandler<BlackoutStateChangedEventArgs>? BlackoutStateChanged;
 
     /// <summary>
     /// Updates which monitors should be blacked out using their bounds as stable identifiers.
@@ -31,7 +57,7 @@ internal sealed partial class BlackoutService : IDisposable
         _selectedMonitorBounds = monitorBounds;
         _settingsService.SaveSelectedMonitorBounds(monitorBounds);
 
-        if (_isBlackedOut)
+        if (IsBlackedOut.Value)
         {
             RefreshOverlays();
         }
@@ -51,7 +77,7 @@ internal sealed partial class BlackoutService : IDisposable
 
             if (shouldBlackOut && !hasOverlay)
             {
-                var overlay = new BlackoutOverlay(monitor.Bounds, _opacity, _clickThrough);
+                var overlay = new BlackoutOverlay(monitor.Bounds, Opacity.Value, ClickThrough.Value);
                 _blackoutOverlays[monitor.Handle] = overlay;
             }
             else if (!shouldBlackOut && hasOverlay)
@@ -68,44 +94,6 @@ internal sealed partial class BlackoutService : IDisposable
     public IReadOnlySet<string>? SelectedMonitorBounds => _selectedMonitorBounds;
 
     /// <summary>
-    /// Gets the current opacity percentage (0-100).
-    /// </summary>
-    public int Opacity => _opacity;
-
-    /// <summary>
-    /// Updates the opacity of the blackout overlays.
-    /// </summary>
-    public void UpdateOpacity(int opacity)
-    {
-        _opacity = opacity;
-        _settingsService.SaveOpacity(_opacity);
-
-        foreach (var overlay in _blackoutOverlays.Values)
-        {
-            overlay.SetOpacity(_opacity);
-        }
-    }
-
-    /// <summary>
-    /// Gets whether click-through is enabled.
-    /// </summary>
-    public bool ClickThrough => _clickThrough;
-
-    /// <summary>
-    /// Updates whether the overlay is click-through.
-    /// </summary>
-    public void UpdateClickThrough(bool clickThrough)
-    {
-        _clickThrough = clickThrough;
-        _settingsService.SaveClickThrough(_clickThrough);
-
-        foreach (var overlay in _blackoutOverlays.Values)
-        {
-            overlay.SetClickThrough(_clickThrough);
-        }
-    }
-
-    /// <summary>
     /// Brings all overlay windows to the front of the Z-order.
     /// </summary>
     public void BringAllToFront()
@@ -116,25 +104,14 @@ internal sealed partial class BlackoutService : IDisposable
         }
     }
 
-    public void Toggle()
-    {
-        if (_isBlackedOut)
-        {
-            Restore();
-        }
-        else
-        {
-            BlackOut();
-        }
-    }
+    public void Toggle() => IsBlackedOut.Value = !IsBlackedOut.Value;
 
-    public void BlackOut()
-    {
-        if (_isBlackedOut)
-        {
-            return;
-        }
+    public void BlackOut() => IsBlackedOut.Value = true;
 
+    public void Restore() => IsBlackedOut.Value = false;
+
+    private void BlackOutInternal()
+    {
         var monitors = MonitorHelper.GetAllMonitors();
 
         foreach (var monitor in monitors)
@@ -148,29 +125,18 @@ internal sealed partial class BlackoutService : IDisposable
                 continue;
             }
 
-            var overlay = new BlackoutOverlay(monitor.Bounds, _opacity, _clickThrough);
+            var overlay = new BlackoutOverlay(monitor.Bounds, Opacity.Value, ClickThrough.Value);
             _blackoutOverlays[monitor.Handle] = overlay;
         }
-
-        _isBlackedOut = true;
-        BlackoutStateChanged?.Invoke(this, new BlackoutStateChangedEventArgs(true));
     }
 
-    public void Restore()
+    private void RestoreInternal()
     {
-        if (!_isBlackedOut)
-        {
-            return;
-        }
-
         foreach (var overlay in _blackoutOverlays.Values)
         {
             overlay.Dispose();
         }
         _blackoutOverlays.Clear();
-
-        _isBlackedOut = false;
-        BlackoutStateChanged?.Invoke(this, new BlackoutStateChangedEventArgs(false));
     }
 
     public void Dispose()
@@ -183,9 +149,4 @@ internal sealed partial class BlackoutService : IDisposable
         _disposed = true;
         Restore();
     }
-}
-
-internal sealed class BlackoutStateChangedEventArgs(bool isBlackedOut) : EventArgs
-{
-    public bool IsBlackedOut { get; } = isBlackedOut;
 }

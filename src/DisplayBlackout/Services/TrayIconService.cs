@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.InteropServices;
+
 using static DisplayBlackout.NativeMethods;
 
 namespace DisplayBlackout.Services;
@@ -17,8 +18,8 @@ internal sealed class TrayIconService : IDisposable
     private const uint MENU_ID_TOGGLE = 2;
     private const uint MENU_ID_EXIT = 3;
 
-    private static WndProcDelegate? s_wndProc;
-    private static TrayIconService? s_instance;
+    private static WndProcDelegate? _wndProc;
+    private static TrayIconService? _instance;
 
     private readonly string _tooltip;
     private readonly nint _hIconActive;
@@ -32,15 +33,15 @@ internal sealed class TrayIconService : IDisposable
 
     private TrayIconService(byte[] activeIco, byte[] inactiveIco, string tooltip)
     {
-        s_instance = this;
+        _instance = this;
         _tooltip = tooltip;
 
-        s_wndProc = TrayWndProc;
+        _wndProc = TrayWndProc;
 
         var wc = new WNDCLASSEXW
         {
             cbSize = (uint)Marshal.SizeOf<WNDCLASSEXW>(),
-            lpfnWndProc = Marshal.GetFunctionPointerForDelegate(s_wndProc),
+            lpfnWndProc = Marshal.GetFunctionPointerForDelegate(_wndProc),
             hInstance = GetModuleHandleW(null),
             lpszClassName = WindowClassName
         };
@@ -142,7 +143,7 @@ internal sealed class TrayIconService : IDisposable
 
     private static nint TrayWndProc(nint hwnd, uint msg, nint wParam, nint lParam)
     {
-        if (s_instance is not { } instance)
+        if (_instance is not { } instance)
         {
             return DefWindowProcW(hwnd, msg, wParam, lParam);
         }
@@ -254,6 +255,6 @@ internal sealed class TrayIconService : IDisposable
             _hwnd = 0;
         }
 
-        s_instance = null;
+        _instance = null;
     }
 }

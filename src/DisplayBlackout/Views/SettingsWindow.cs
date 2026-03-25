@@ -13,50 +13,16 @@ internal sealed class SettingsView : UserControl
         var monitorPicker = new MonitorPickerView(blackoutService);
 
         var blackoutToggle = new ToggleSwitch()
-            .IsChecked(blackoutService.IsBlackedOut)
-            .OnCheckedChanged(isChecked =>
-            {
-                if (isChecked != blackoutService.IsBlackedOut)
-                {
-                    blackoutService.Toggle();
-                }
-            });
-
-        // Sync toggle when state changes externally (hotkey, tray icon)
-        blackoutService.BlackoutStateChanged += (_, e) =>
-        {
-            if (Application.IsRunning)
-            {
-                Application.Current?.Dispatcher?.BeginInvoke(() =>
-                {
-                    blackoutToggle.IsChecked = e.IsBlackedOut;
-                });
-            }
-        };
+            .BindIsChecked(blackoutService.IsBlackedOut);
 
         var opacitySlider = new Slider()
             .Width(200)
             .SmallChange(1)
             .Maximum(100)
-            .Value(blackoutService.Opacity)
-            .OnValueChanged(v =>
-            {
-                int newOpacity = (int)v;
-                if (newOpacity != blackoutService.Opacity)
-                {
-                    blackoutService.UpdateOpacity(newOpacity);
-                }
-            });
+            .Bind(RangeBase.ValueProperty, blackoutService.Opacity, v => (double)v, v => (int)Math.Round(v));
 
         var clickThroughToggle = new ToggleSwitch()
-            .IsChecked(blackoutService.ClickThrough)
-            .OnCheckedChanged(isChecked =>
-            {
-                if (isChecked != blackoutService.ClickThrough)
-                {
-                    blackoutService.UpdateClickThrough(isChecked);
-                }
-            });
+            .BindIsChecked(blackoutService.ClickThrough);
 
         Content = new ScrollViewer()
             .AutoVerticalScroll()
