@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>DisplayBlackout</RootNamespace>
+    <AssemblyName>DisplayBlackout</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Language and Analysis -->
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+
+    <!-- AOT -->
+    <PublishAot>true</PublishAot>
+
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\SEGMDL2.TTF" />
+  </ItemGroup>
+ 
+
+  <ItemGroup>
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\icon.ico" LogicalName="icon.ico" />
+    <EmbeddedResource Include="Assets\icon-inactive.ico" LogicalName="icon-inactive.ico" />
+    <!--<EmbeddedResource Include="Resources\SEGMDL2.TTF" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aprillz.MewUI.Backend.Gdi" Version="0.14.0" />
+    <PackageReference Include="Aprillz.MewUI.Platform.Win32" Version="0.14.0" />
+  </ItemGroup>
+
+</Project>
