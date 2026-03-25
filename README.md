@@ -56,6 +56,3 @@ MewUI removes this layer entirely. There is no WinAppSDK dependency, no MSIX pac
 This project is based on:
 
 - **[Display Blackout](https://github.com/domenic/display-blackout)** by Domenic Denicola
-- **[MewUI](https://github.com/AprillzZ/MewUI)** UI framework
-
-All credit for the original design and functionality belongs to the original author.
