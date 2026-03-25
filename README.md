@@ -4,7 +4,7 @@ A **MewUI port** of the original **[Display Blackout](https://github.com/domenic
 
 A Windows system tray utility that blacks out selected displays on demand. Useful for reducing distractions while gaming, focusing on a single monitor, or dimming secondary displays during video calls.
 
-The original project's README discusses the real-world friction of building and distributing a small Windows desktop utility — runtime bundling, MSIX sideloading, Store rejection, and the WinAppSDK runtime dependency that persists even after NativeAOT. This port explores **how much of that friction MewUI can eliminate**.
+The original project's README raises practical concerns about shipping a small native Windows utility — runtime bundling and external runtime dependencies that persist even after NativeAOT. This port explores **what answers MewUI can offer to those same questions**.
 
 
 > [!NOTE]
