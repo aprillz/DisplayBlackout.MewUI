@@ -47,9 +47,9 @@ This app requires no administrator elevation, makes no network requests, and col
 
 ## Why MewUI?
 
-The original author noted that WinUI 3 supports NativeAOT, which bundles the .NET runtime into the binary. However, **the WinAppSDK runtime itself still requires separate installation** on the user's machine — the AOT story is only half-complete. Combined with MSIX packaging requirements and Store distribution issues, shipping a simple tray utility becomes disproportionately complex.
+The original author noted that WinUI 3 supports NativeAOT, which bundles the .NET runtime into the binary. However, **the WinAppSDK runtime itself still requires separate installation** on the user's machine — the AOT story is only half-complete.
 
-MewUI removes this layer entirely. There is no WinAppSDK dependency, no MSIX packaging, and no external runtime requirement. The result is a single standalone executable with no installation steps.
+MewUI removes this layer entirely. There is no WinAppSDK dependency and no external runtime requirement.
 
 ## Attribution
 
