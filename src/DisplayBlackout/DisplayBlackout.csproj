@@ -38,8 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aprillz.MewUI.Backend.Gdi" Version="0.14.0" />
-    <PackageReference Include="Aprillz.MewUI.Platform.Win32" Version="0.14.0" />
+    <PackageReference Include="Aprillz.MewUI.Backend.Gdi" Version="0.15.0" />
+    <PackageReference Include="Aprillz.MewUI.Platform.Win32" Version="0.15.0" />
   </ItemGroup>
 
 </Project>
