@@ -182,10 +182,15 @@ internal sealed class SettingsView : UserControl
     {
         if (OperatingSystem.IsMacOS())
         {
-            return SettingsCard("\uEDA7", "Activation shortcut", "Menu bar only on macOS",
-                new TextBlock()
-                    .Text("Unavailable")
-                    .CenterVertical());
+            return SettingsCard("\uEDA7", "Activation shortcut", "Press this shortcut to toggle blackout",
+                new StackPanel()
+                    .Horizontal()
+                    .Spacing(4)
+                    .Children(
+                        KeyBadge("\u2318"),
+                        KeyBadge("\u21E7"),
+                        KeyBadge("B")
+                    ));
         }
 
         return SettingsCard("\uEDA7", "Activation shortcut", "Press this shortcut to toggle blackout",
