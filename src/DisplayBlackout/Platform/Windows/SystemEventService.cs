@@ -1,11 +1,9 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-using DisplayBlackout.Platform;
+using static DisplayBlackout.Platform.Win32.NativeMethods;
 
-using static DisplayBlackout.NativeMethods;
-
-namespace DisplayBlackout.Services;
+namespace DisplayBlackout.Platform.Win32;
 
 /// <summary>
 /// Listens for system-level events (hotkeys, display changes, focus changes) using a hidden

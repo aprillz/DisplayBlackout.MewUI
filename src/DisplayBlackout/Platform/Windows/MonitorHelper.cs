@@ -1,6 +1,6 @@
-using static DisplayBlackout.NativeMethods;
+using static DisplayBlackout.Platform.Win32.NativeMethods;
 
-namespace DisplayBlackout;
+namespace DisplayBlackout.Platform.Win32;
 
 /// <summary>
 /// Enumerates display monitors using Win32 APIs, replacing WinAppSDK's DisplayArea.
@@ -31,6 +31,4 @@ internal static class MonitorHelper
 }
 
 internal sealed record MonitorInfo(nint Handle, RECT Bounds, RECT WorkArea, bool IsPrimary, string DeviceName)
-{
-    public string BoundsKey => $"{Bounds.Left},{Bounds.Top},{Bounds.Width},{Bounds.Height}";
-}
+;

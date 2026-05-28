@@ -18,13 +18,6 @@ internal sealed class SettingsService
         _settings = Load();
     }
 
-    /// <summary>
-    /// Creates a stable identifier for a monitor based on its bounds.
-    /// Format: "X,Y,W,H" (e.g., "0,0,1920,1080")
-    /// </summary>
-    public static string GetMonitorKey(NativeMethods.RECT bounds)
-        => $"{bounds.Left},{bounds.Top},{bounds.Width},{bounds.Height}";
-
     public HashSet<string>? LoadSelectedMonitorBounds()
         => LoadSelectedMonitorIds();
 

@@ -2,11 +2,9 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-using DisplayBlackout.Platform;
+using static DisplayBlackout.Platform.Win32.NativeMethods;
 
-using static DisplayBlackout.NativeMethods;
-
-namespace DisplayBlackout.Services;
+namespace DisplayBlackout.Platform.Win32;
 
 /// <summary>
 /// Win32 Shell_NotifyIcon wrapper for system tray icon with context menu.

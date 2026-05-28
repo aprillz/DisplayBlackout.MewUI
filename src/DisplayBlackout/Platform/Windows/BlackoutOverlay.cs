@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 
 using DisplayBlackout.Platform;
 
-using static DisplayBlackout.NativeMethods;
+using static DisplayBlackout.Platform.Win32.NativeMethods;
 
-namespace DisplayBlackout;
+namespace DisplayBlackout.Platform.Win32;
 
 /// <summary>
 /// Pure Win32 windows for blacking out monitors. Uses raw Win32 instead of XAML to avoid
