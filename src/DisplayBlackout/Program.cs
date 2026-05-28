@@ -47,6 +47,10 @@ else
 // For Windows 7
 //FontResources.Register(typeof(SettingsView).Assembly!.GetManifestResourceStream("DisplayBlackout.Resources.SEGMDL2.TTF")!, "Segoe MDL2 Assets");
 
+// Required on macOS for Segoe MDL2 Assets icons
+if (OperatingSystem.IsMacOS())
+    FontResources.Register(typeof(SettingsView).Assembly!.GetManifestResourceStream("DisplayBlackout.Resources.SEGMDL2.TTF")!, "Segoe MDL2 Assets");
+
 // Parse command-line arguments
 var cliArgs = Environment.GetCommandLineArgs().Skip(1).ToArray();
 bool openSettings = cliArgs.Any(arg => arg.Equals("/OpenSettings", StringComparison.OrdinalIgnoreCase));
