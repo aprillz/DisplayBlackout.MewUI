@@ -2,6 +2,8 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+using DisplayBlackout.Platform;
+
 using static DisplayBlackout.NativeMethods;
 
 namespace DisplayBlackout.Services;
@@ -10,7 +12,7 @@ namespace DisplayBlackout.Services;
 /// Win32 Shell_NotifyIcon wrapper for system tray icon with context menu.
 /// Icons are loaded from embedded resources; two states (active/inactive) are cached as HICONs.
 /// </summary>
-internal sealed class TrayIconService : IDisposable
+internal sealed class TrayIconService : IAppIndicator
 {
     private const string WindowClassName = "DisplayBlackoutTray";
     private const uint WM_TRAYICON = WM_APP + 1;

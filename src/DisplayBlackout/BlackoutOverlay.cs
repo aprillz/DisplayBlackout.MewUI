@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
+using DisplayBlackout.Platform;
+
 using static DisplayBlackout.NativeMethods;
 
 namespace DisplayBlackout;
@@ -14,7 +16,7 @@ namespace DisplayBlackout;
 /// Windows from detecting a "fullscreen app" and automatically enabling Focus Assist (Do Not
 /// Disturb), which would suppress notifications system-wide.
 /// </remarks>
-internal sealed partial class BlackoutOverlay : IDisposable
+internal sealed partial class BlackoutOverlay : IBlackoutOverlay
 {
     private const string WindowClassName = "DisplayBlackoutOverlay";
 

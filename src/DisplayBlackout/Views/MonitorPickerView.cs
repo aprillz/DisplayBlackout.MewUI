@@ -1,6 +1,7 @@
 using Aprillz.MewUI;
 using Aprillz.MewUI.Controls;
 
+using DisplayBlackout.Platform;
 using DisplayBlackout.Services;
 
 namespace DisplayBlackout.Views;
@@ -37,19 +38,21 @@ internal sealed class MonitorPickerView : UserControl
 
     private void BuildMonitors()
     {
-        var monitors = MonitorHelper.GetAllMonitors();
+        var monitors = _blackoutService.GetDisplays().ToList();
 
         if (monitors.Count == 0)
         {
             return;
         }
 
-        // Assign display numbers by DeviceName order (\\.\DISPLAY1, \\.\DISPLAY2, ...)
         var displayNumbers = new Dictionary<string, int>();
-        var sorted = monitors.OrderBy(m => m.DeviceName, StringComparer.OrdinalIgnoreCase).ToList();
+        var sorted = monitors
+            .OrderBy(static m => m.SortOrder)
+            .ThenBy(static m => m.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
         for (int i = 0; i < sorted.Count; i++)
         {
-            displayNumbers[sorted[i].BoundsKey] = i + 1;
+            displayNumbers[sorted[i].Id] = i + 1;
         }
 
         // Sort by X then Y for visual layout
@@ -70,7 +73,7 @@ internal sealed class MonitorPickerView : UserControl
         const double targetHeight = 120;
         double scale = maxHeight > 0 ? targetHeight / maxHeight : 1;
 
-        var selectedBounds = _blackoutService.SelectedMonitorBounds;
+        var selectedIds = _blackoutService.SelectedMonitorIds;
 
         for (int i = 0; i < monitors.Count; i++)
         {
@@ -78,11 +81,11 @@ internal sealed class MonitorPickerView : UserControl
             double w = monitor.Bounds.Width * scale;
             double h = monitor.Bounds.Height * scale;
 
-            bool isSelected = selectedBounds != null
-                ? selectedBounds.Contains(monitor.BoundsKey)
+            bool isSelected = selectedIds != null
+                ? selectedIds.Contains(monitor.Id)
                 : !monitor.IsPrimary;
 
-            var toggle = new MonitorToggle(displayNumbers[monitor.BoundsKey], monitor.BoundsKey, monitor.IsPrimary, isSelected);
+            var toggle = new MonitorToggle(displayNumbers[monitor.Id], monitor.Id, monitor.IsPrimary, isSelected);
             toggle.Button
                 .Width(w)
                 .Height(h);
@@ -100,7 +103,7 @@ internal sealed class MonitorPickerView : UserControl
         {
             if (toggle.Button.IsChecked)
             {
-                selected.Add(toggle.BoundsKey);
+                selected.Add(toggle.DisplayId);
             }
         }
         _blackoutService.UpdateSelectedMonitors(selected);
@@ -109,15 +112,15 @@ internal sealed class MonitorPickerView : UserControl
 
 internal sealed class MonitorToggle
 {
-    public string BoundsKey { get; }
+    public string DisplayId { get; }
 
     public bool IsPrimary { get; }
 
     public ToggleButton Button { get; }
 
-    public MonitorToggle(int displayNumber, string boundsKey, bool isPrimary, bool isSelected)
+    public MonitorToggle(int displayNumber, string displayId, bool isPrimary, bool isSelected)
     {
-        BoundsKey = boundsKey;
+        DisplayId = displayId;
         IsPrimary = isPrimary;
 
         var label = new TextBlock()

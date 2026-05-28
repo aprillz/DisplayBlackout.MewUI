@@ -23,11 +23,16 @@ internal sealed class MainWindow : Window
 
         Closing += e =>
         {
+            if (OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
             e.Cancel = true;
             Hide();
         };
 
-        if (!hotkeyAvailable)
+        if (!hotkeyAvailable && OperatingSystem.IsWindows())
         {
             this.OnLoaded(() =>
             {

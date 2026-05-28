@@ -26,8 +26,12 @@ internal sealed class SettingsService
         => $"{bounds.Left},{bounds.Top},{bounds.Width},{bounds.Height}";
 
     public HashSet<string>? LoadSelectedMonitorBounds()
+        => LoadSelectedMonitorIds();
+
+    public HashSet<string>? LoadSelectedMonitorIds()
     {
-        if (_settings.SelectedMonitorBounds is not { Length: > 0 } str)
+        var str = _settings.SelectedMonitorIds ?? _settings.SelectedMonitorBounds;
+        if (str is not { Length: > 0 })
         {
             return null;
         }
@@ -41,9 +45,12 @@ internal sealed class SettingsService
     }
 
     public void SaveSelectedMonitorBounds(HashSet<string>? monitorBounds)
+        => SaveSelectedMonitorIds(monitorBounds);
+
+    public void SaveSelectedMonitorIds(HashSet<string>? monitorIds)
     {
-        _settings.SelectedMonitorBounds = monitorBounds is { Count: > 0 }
-            ? string.Join('|', monitorBounds)
+        _settings.SelectedMonitorIds = monitorIds is { Count: > 0 }
+            ? string.Join('|', monitorIds)
             : null;
         Save();
     }
@@ -121,6 +128,8 @@ internal sealed class SettingsService
 internal sealed class AppSettings
 {
     public string? SelectedMonitorBounds { get; set; }
+
+    public string? SelectedMonitorIds { get; set; }
 
     public int Opacity { get; set; } = 100;
 
