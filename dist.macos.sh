@@ -52,6 +52,11 @@ rsync -a --exclude='*.dSYM' "$PUBLISH_DIR/$RID_ARM/" "$APP_BUNDLE/Contents/Resou
 mv "$UNIV_EXE" "$APP_BUNDLE/Contents/MacOS/$EXE_NAME"
 chmod +x "$APP_BUNDLE/Contents/MacOS/$EXE_NAME"
 
+ICNS_SRC="$SCRIPT_DIR/src/DisplayBlackout/Assets/icon.icns"
+if [ -f "$ICNS_SRC" ]; then
+  cp "$ICNS_SRC" "$APP_BUNDLE/Contents/Resources/icon.icns"
+fi
+
 cat > "$APP_BUNDLE/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -69,6 +74,8 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<PLIST
   <string>$EXE_NAME</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
+  <key>CFBundleIconFile</key>
+  <string>icon</string>
   <key>LSMinimumSystemVersion</key>
   <string>13.0</string>
 </dict>
