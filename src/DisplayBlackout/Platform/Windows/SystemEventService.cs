@@ -1,15 +1,15 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-using static DisplayBlackout.NativeMethods;
+using static DisplayBlackout.Platform.Win32.NativeMethods;
 
-namespace DisplayBlackout.Services;
+namespace DisplayBlackout.Platform.Win32;
 
 /// <summary>
 /// Listens for system-level events (hotkeys, display changes, focus changes) using a hidden
 /// Win32 window and WinEvent hooks.
 /// </summary>
-internal sealed partial class SystemEventService : IDisposable
+internal sealed partial class SystemEventService : ISystemEventService
 {
     private const string WindowClassName = "DisplayBlackoutSystemEvents";
     private const int HotkeyId = 1;

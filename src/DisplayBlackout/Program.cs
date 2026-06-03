@@ -2,15 +2,54 @@ using System.Reflection;
 
 using Aprillz.MewUI;
 using Aprillz.MewUI.Controls;
+using Aprillz.MewUI.Platform.MacOS;
 
+using DisplayBlackout.Platform;
+using DisplayBlackout.Platform.MacOS;
+using DisplayBlackout.Platform.Win32;
 using DisplayBlackout.Services;
 using DisplayBlackout.Views;
 
-Win32Platform.Register();
-GdiBackend.Register();
+IDisplayService displayService;
+IBlackoutOverlayFactory overlayFactory;
+ISystemEventService systemEvents;
+IAppIndicator appIndicator;
+
+var asm = Assembly.GetExecutingAssembly();
+
+if (OperatingSystem.IsMacOS())
+{
+    MacOSPlatform.Register();
+    MewVGMacOSBackend.Register();
+
+    var platformServices = new MacOSPlatformServices();
+    displayService = platformServices.DisplayService;
+    overlayFactory = platformServices.OverlayFactory;
+    systemEvents = platformServices.SystemEvents;
+    appIndicator = platformServices.CreateAppIndicator(asm);
+}
+else if (OperatingSystem.IsWindows())
+{
+    Win32Platform.Register();
+    GdiBackend.Register();
+
+    var platformServices = new Win32PlatformServices();
+    displayService = platformServices.DisplayService;
+    overlayFactory = platformServices.OverlayFactory;
+    systemEvents = platformServices.SystemEvents;
+    appIndicator = platformServices.CreateAppIndicator(asm);
+}
+else
+{
+    throw new PlatformNotSupportedException("DisplayBlackout.MewUI currently supports Windows and macOS.");
+}
 
 // For Windows 7
 //FontResources.Register(typeof(SettingsView).Assembly!.GetManifestResourceStream("DisplayBlackout.Resources.SEGMDL2.TTF")!, "Segoe MDL2 Assets");
+
+// Required on macOS for Segoe MDL2 Assets icons
+if (OperatingSystem.IsMacOS())
+    FontResources.Register(typeof(SettingsView).Assembly!.GetManifestResourceStream("DisplayBlackout.Resources.SEGMDL2.TTF")!, "Segoe MDL2 Assets");
 
 // Parse command-line arguments
 var cliArgs = Environment.GetCommandLineArgs().Skip(1).ToArray();
@@ -24,28 +63,24 @@ if (resetSettings)
     settingsService.ResetAll();
 }
 
-var blackoutService = new BlackoutService(settingsService);
+var blackoutService = new BlackoutService(settingsService, displayService, overlayFactory);
 
 // System events (hotkey, display change, focus change)
-bool hotkeyAvailable = SystemEventService.Instance.Initialize();
-SystemEventService.Instance.HotkeyPressed += (_, _) => blackoutService.Toggle();
-SystemEventService.Instance.DisplayChanged += (_, _) =>
+bool hotkeyAvailable = systemEvents.Initialize();
+systemEvents.HotkeyPressed += (_, _) => blackoutService.Toggle();
+systemEvents.DisplayChanged += (_, _) =>
 {
     if (blackoutService.IsBlackedOut.Value)
     {
         blackoutService.Restore();
     }
 };
-SystemEventService.Instance.FocusChanged += (_, _) => blackoutService.BringAllToFront();
+systemEvents.FocusChanged += (_, _) => blackoutService.BringAllToFront();
 
-// Tray icon (loads active/inactive icons from embedded resources)
-var asm = Assembly.GetExecutingAssembly();
-var trayIcon = TrayIconService.FromResources(asm, "icon.ico", "icon-inactive.ico",
-    "Display Blackout - Click to toggle (Win+Shift+B), double-click to open settings");
-trayIcon.Clicked += () => blackoutService.Toggle();
-trayIcon.Show();
+appIndicator.Clicked += () => blackoutService.Toggle();
+appIndicator.Show();
 
-blackoutService.IsBlackedOut.Subscribe(() => trayIcon.SetActive(blackoutService.IsBlackedOut.Value));
+blackoutService.IsBlackedOut.Subscribe(() => appIndicator.SetActive(blackoutService.IsBlackedOut.Value));
 
 // Restore saved theme/accent
 var savedAccent = settingsService.LoadAccent();
@@ -63,12 +98,12 @@ Application.Create()
     .BuildMainWindow(() =>
     {
         var window = new MainWindow(blackoutService, settingsService, hotkeyAvailable);
-        trayIcon.DoubleClicked += () => window.Show();
+        appIndicator.DoubleClicked += () => window.Show();
         return window;
     })
     .Run();
 
 // Cleanup
-trayIcon.Dispose();
+appIndicator.Dispose();
 blackoutService.Dispose();
-SystemEventService.Instance.Dispose();
+systemEvents.Dispose();

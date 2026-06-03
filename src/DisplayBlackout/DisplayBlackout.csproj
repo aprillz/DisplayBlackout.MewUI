@@ -22,7 +22,7 @@
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
     <None Remove="Resources\SEGMDL2.TTF" />
   </ItemGroup>
 
@@ -34,12 +34,23 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\icon.ico" LogicalName="icon.ico" />
     <EmbeddedResource Include="Assets\icon-inactive.ico" LogicalName="icon-inactive.ico" />
-    <!--<EmbeddedResource Include="Resources\SEGMDL2.TTF" />-->
+    <EmbeddedResource Include="Assets\icon.icns" LogicalName="icon.icns" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+    <EmbeddedResource Include="Assets\StatusActive.png" LogicalName="StatusActive.png" />
+    <EmbeddedResource Include="Assets\StatusInactive.png" LogicalName="StatusInactive.png" />
+    <EmbeddedResource Include="Resources\SEGMDL2.TTF" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <LinkerArg Include="-framework CoreGraphics" />
+    <LinkerArg Include="-framework Carbon" />
+    <LinkerArg Include="-L/opt/homebrew/opt/openssl@3/lib" />
+    <LinkerArg Include="-L/opt/homebrew/opt/brotli/lib" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aprillz.MewUI.Backend.Gdi" Version="0.15.0" />
-    <PackageReference Include="Aprillz.MewUI.Platform.Win32" Version="0.15.0" />
+    <PackageReference Include="Aprillz.MewUI.Backend.Gdi" Version="0.15.2" />
+    <PackageReference Include="Aprillz.MewUI.MacOS" Version="0.15.2" />
+    <PackageReference Include="Aprillz.MewUI.Platform.Win32" Version="0.15.2" />
   </ItemGroup>
 
 </Project>

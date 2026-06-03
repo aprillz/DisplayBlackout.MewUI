@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace DisplayBlackout;
+namespace DisplayBlackout.Platform.Win32;
 
 /// <summary>
 /// Win32 P/Invoke declarations, structs, enums, and constants shared across the application.

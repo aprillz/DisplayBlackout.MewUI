@@ -1,9 +1,11 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-using static DisplayBlackout.NativeMethods;
+using DisplayBlackout.Platform;
 
-namespace DisplayBlackout;
+using static DisplayBlackout.Platform.Win32.NativeMethods;
+
+namespace DisplayBlackout.Platform.Win32;
 
 /// <summary>
 /// Pure Win32 windows for blacking out monitors. Uses raw Win32 instead of XAML to avoid
@@ -14,7 +16,7 @@ namespace DisplayBlackout;
 /// Windows from detecting a "fullscreen app" and automatically enabling Focus Assist (Do Not
 /// Disturb), which would suppress notifications system-wide.
 /// </remarks>
-internal sealed partial class BlackoutOverlay : IDisposable
+internal sealed partial class BlackoutOverlay : IBlackoutOverlay
 {
     private const string WindowClassName = "DisplayBlackoutOverlay";
 

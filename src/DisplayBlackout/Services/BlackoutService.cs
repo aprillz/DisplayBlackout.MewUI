@@ -1,12 +1,16 @@
 using Aprillz.MewUI;
 
+using DisplayBlackout.Platform;
+
 namespace DisplayBlackout.Services;
 
 internal sealed partial class BlackoutService : IDisposable
 {
     private readonly SettingsService _settingsService;
-    private readonly Dictionary<nint, BlackoutOverlay> _blackoutOverlays = [];
-    private HashSet<string>? _selectedMonitorBounds;
+    private readonly IDisplayService _displayService;
+    private readonly IBlackoutOverlayFactory _overlayFactory;
+    private readonly Dictionary<string, IBlackoutOverlay> _blackoutOverlays = [];
+    private HashSet<string>? _selectedMonitorIds;
     private bool _disposed;
 
     public ObservableValue<bool> IsBlackedOut { get; }
@@ -15,10 +19,12 @@ internal sealed partial class BlackoutService : IDisposable
 
     public ObservableValue<bool> ClickThrough { get; }
 
-    public BlackoutService(SettingsService settingsService)
+    public BlackoutService(SettingsService settingsService, IDisplayService displayService, IBlackoutOverlayFactory overlayFactory)
     {
         _settingsService = settingsService;
-        _selectedMonitorBounds = _settingsService.LoadSelectedMonitorBounds();
+        _displayService = displayService;
+        _overlayFactory = overlayFactory;
+        _selectedMonitorIds = _settingsService.LoadSelectedMonitorIds();
 
         IsBlackedOut = new(false);
         Opacity = new(settingsService.LoadOpacity());
@@ -52,10 +58,10 @@ internal sealed partial class BlackoutService : IDisposable
     /// Updates which monitors should be blacked out using their bounds as stable identifiers.
     /// Null means default (all non-primary).
     /// </summary>
-    public void UpdateSelectedMonitors(HashSet<string>? monitorBounds)
+    public void UpdateSelectedMonitors(HashSet<string>? monitorIds)
     {
-        _selectedMonitorBounds = monitorBounds;
-        _settingsService.SaveSelectedMonitorBounds(monitorBounds);
+        _selectedMonitorIds = monitorIds;
+        _settingsService.SaveSelectedMonitorIds(monitorIds);
 
         if (IsBlackedOut.Value)
         {
@@ -65,33 +71,41 @@ internal sealed partial class BlackoutService : IDisposable
 
     private void RefreshOverlays()
     {
-        var monitors = MonitorHelper.GetAllMonitors();
+        var monitors = _displayService.GetDisplays();
+        var liveIds = monitors.Select(static m => m.Id).ToHashSet(StringComparer.Ordinal);
 
         foreach (var monitor in monitors)
         {
-            bool shouldBlackOut = _selectedMonitorBounds != null
-                ? _selectedMonitorBounds.Contains(monitor.BoundsKey)
+            bool shouldBlackOut = _selectedMonitorIds != null
+                ? _selectedMonitorIds.Contains(monitor.Id)
                 : !monitor.IsPrimary;
 
-            bool hasOverlay = _blackoutOverlays.ContainsKey(monitor.Handle);
+            bool hasOverlay = _blackoutOverlays.ContainsKey(monitor.Id);
 
             if (shouldBlackOut && !hasOverlay)
             {
-                var overlay = new BlackoutOverlay(monitor.Bounds, Opacity.Value, ClickThrough.Value);
-                _blackoutOverlays[monitor.Handle] = overlay;
+                _blackoutOverlays[monitor.Id] = _overlayFactory.Create(monitor, Opacity.Value, ClickThrough.Value);
             }
             else if (!shouldBlackOut && hasOverlay)
             {
-                _blackoutOverlays[monitor.Handle].Dispose();
-                _blackoutOverlays.Remove(monitor.Handle);
+                _blackoutOverlays[monitor.Id].Dispose();
+                _blackoutOverlays.Remove(monitor.Id);
             }
+        }
+
+        foreach (var id in _blackoutOverlays.Keys.Where(id => !liveIds.Contains(id)).ToArray())
+        {
+            _blackoutOverlays[id].Dispose();
+            _blackoutOverlays.Remove(id);
         }
     }
 
     /// <summary>
     /// Gets the currently selected monitor bounds for UI initialization.
     /// </summary>
-    public IReadOnlySet<string>? SelectedMonitorBounds => _selectedMonitorBounds;
+    public IReadOnlySet<string>? SelectedMonitorIds => _selectedMonitorIds;
+
+    public IReadOnlyList<DisplayInfo> GetDisplays() => _displayService.GetDisplays();
 
     /// <summary>
     /// Brings all overlay windows to the front of the Z-order.
@@ -112,12 +126,12 @@ internal sealed partial class BlackoutService : IDisposable
 
     private void BlackOutInternal()
     {
-        var monitors = MonitorHelper.GetAllMonitors();
+        var monitors = _displayService.GetDisplays();
 
         foreach (var monitor in monitors)
         {
-            bool shouldBlackOut = _selectedMonitorBounds != null
-                ? _selectedMonitorBounds.Contains(monitor.BoundsKey)
+            bool shouldBlackOut = _selectedMonitorIds != null
+                ? _selectedMonitorIds.Contains(monitor.Id)
                 : !monitor.IsPrimary;
 
             if (!shouldBlackOut)
@@ -125,8 +139,7 @@ internal sealed partial class BlackoutService : IDisposable
                 continue;
             }
 
-            var overlay = new BlackoutOverlay(monitor.Bounds, Opacity.Value, ClickThrough.Value);
-            _blackoutOverlays[monitor.Handle] = overlay;
+            _blackoutOverlays[monitor.Id] = _overlayFactory.Create(monitor, Opacity.Value, ClickThrough.Value);
         }
     }
 

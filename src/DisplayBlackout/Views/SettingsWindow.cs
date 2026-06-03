@@ -68,15 +68,7 @@ internal sealed class SettingsView : UserControl
                             .Margin(0, 24, 0, 4),
 
                         // Activation shortcut display
-                        SettingsCard("\uEDA7", "Activation shortcut", "Press this shortcut to toggle blackout",
-                            new StackPanel()
-                                .Horizontal()
-                                .Spacing(4)
-                                .Children(
-                                    WinKeyBadge(),
-                                    KeyBadge("Shift"),
-                                    KeyBadge("B")
-                                )),
+                        CreateShortcutCard(),
 
                         // Appearance
                         new Expander()
@@ -184,6 +176,32 @@ internal sealed class SettingsView : UserControl
         }
 
         return panel;
+    }
+
+    private static FrameworkElement CreateShortcutCard()
+    {
+        if (OperatingSystem.IsMacOS())
+        {
+            return SettingsCard("\uEDA7", "Activation shortcut", "Press this shortcut to toggle blackout",
+                new StackPanel()
+                    .Horizontal()
+                    .Spacing(4)
+                    .Children(
+                        KeyBadge("\u2318"),
+                        KeyBadge("\u21E7"),
+                        KeyBadge("B")
+                    ));
+        }
+
+        return SettingsCard("\uEDA7", "Activation shortcut", "Press this shortcut to toggle blackout",
+            new StackPanel()
+                .Horizontal()
+                .Spacing(4)
+                .Children(
+                    WinKeyBadge(),
+                    KeyBadge("Shift"),
+                    KeyBadge("B")
+                ));
     }
 
     private static FrameworkElement WinKeyBadge()
